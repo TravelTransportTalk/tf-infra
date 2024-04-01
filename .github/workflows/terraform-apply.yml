@@ -26,10 +26,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Prepare .terraformrc
-        run: echo ${{ vars.TERRAFORM_RC }} | base64 -d > ~/.terraformrc
+        run: sh -c 'echo "${{ vars.TERRAFORM_RC }}" | base64 -d > ~/.terraformrc'
 
       - name: Prepare tfvars
-        run: echo "${{ secrets.TFVARS_FILES }}" | base64 -d > .tfvars
+        run: sh -c 'echo "${{ secrets.TFVARS_FILES }}" | base64 -d > .tfvars'
 
       - name: Init
         run: terraform init
