@@ -1,0 +1,54 @@
+---
+name: Manage Terraform state from CI/CD
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  tf-init:
+    runs-on: ubuntu-latest
+    env:
+      TERRAFORM_RC: "${{ secrets.TERRAFORM_RC }}"
+      TF_VAR_auth: ${{ secrets.TF_VAR_AUTH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+
+      - name: Download state
+        env:
+          AWS_ENDPOINT_URL: "${{ vars.S3_ENDPOINT }}"
+          AWS_ACCESS_KEY_ID: "${{ secrets.S3_ACCESS_KEY }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.S3_SECRET_KEY }}"
+          AWS_DEFAULT_REGION: "${{ vars.S3_REGION }}"
+        run: |
+          aws s3 cp --recursive s3://${{ vars.S3_BUCKET }} ./
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Prepare .terraformrc
+        run: echo "$TERRAFORM_RC" > ~/.terraformrc
+
+      - name: Init
+        run: terraform init
+
+      - name: Validate
+        run: terraform validate
+
+      - name: Apply
+        run: terraform apply -auto-approve
+
+      - name: Wait for sync
+        run: for i in {1..10}; do terraform refresh && break || sleep 60; done
+
+      - name: Upload new state
+        env:
+          AWS_ENDPOINT_URL: "${{ vars.S3_ENDPOINT }}"
+          AWS_ACCESS_KEY_ID: "${{ secrets.S3_ACCESS_KEY }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.S3_SECRET_KEY }}"
+          AWS_DEFAULT_REGION: "${{ vars.S3_REGION }}"
+        run: |
+          aws s3 cp terraform.tfstate s3://${{ vars.S3_BUCKET }}
+          aws s3 cp terraform.tfstate.backup s3://${{ vars.S3_BUCKET }}
