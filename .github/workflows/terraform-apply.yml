@@ -41,7 +41,7 @@ jobs:
         run: terraform apply -auto-approve -var-file .tfvars
 
       - name: Wait for sync
-        run: for i in {1..10}; do terraform refresh && break || sleep 60; done
+        run: for i in {1..10}; do terraform refresh -var-file .tfvars && break || sleep 60; done
 
       - name: Upload new state
         env:
