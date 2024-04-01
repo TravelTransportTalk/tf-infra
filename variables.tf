@@ -24,5 +24,5 @@ variable "k8s_version" {
 
 variable "k8s_cidr" {
   type = string
-  default = "10.100.0.0/24"
+  default = "192.168.100.0/22"
 }
