@@ -30,11 +30,14 @@ jobs:
       - name: Prepare .terraformrc
         run: echo "$TERRAFORM_RC" > ~/.terraformrc
 
+      - name: Prepare tfvars
+        run: echo "$TFVARS_FILES" > .tfvars
+
       - name: Init
         run: terraform init
 
       - name: Validate
-        run: terraform validate
+        run: terraform validate -var-file .tfvars
 
       - name: Plan
-        run: terraform plan
+        run: terraform plan -var-file .tfvars

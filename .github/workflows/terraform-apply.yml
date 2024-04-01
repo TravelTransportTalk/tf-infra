@@ -31,6 +31,9 @@ jobs:
       - name: Prepare .terraformrc
         run: echo "$TERRAFORM_RC" > ~/.terraformrc
 
+      - name: Prepare tfvars
+        run: echo "$TFVARS_FILES" > .tfvars
+
       - name: Init
         run: terraform init
 
@@ -38,7 +41,7 @@ jobs:
         run: terraform validate
 
       - name: Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var-file .tfvars
 
       - name: Wait for sync
         run: for i in {1..10}; do terraform refresh && break || sleep 60; done
