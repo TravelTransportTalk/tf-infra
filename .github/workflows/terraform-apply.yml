@@ -7,9 +7,6 @@ on:
 jobs:
   tf-init:
     runs-on: ubuntu-latest
-    env:
-      TERRAFORM_RC: "${{ secrets.TERRAFORM_RC }}"
-      TF_VAR_auth: ${{ secrets.TF_VAR_AUTH }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,10 +26,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Prepare .terraformrc
-        run: echo "$TERRAFORM_RC" > ~/.terraformrc
+        run: echo "${{ vars.TERRAFORM_RC }}" > ~/.terraformrc
 
       - name: Prepare tfvars
-        run: echo "$TFVARS_FILES" > .tfvars
+        run: echo "${{ secrets.TFVARS_FILES }}" > .tfvars
 
       - name: Init
         run: terraform init
